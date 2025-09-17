@@ -829,13 +829,13 @@ const registerEventListeners = (root, page) => {
     const input = page.querySelector(SELECTORS.region.searchInput);
     const clearIcon = page.querySelector(SELECTORS.region.clearIcon);
 
-    clearIcon.addEventListener('click', () => {
+    clearIcon?.addEventListener('click', () => {
         input.value = '';
         input.focus();
         clearSearch(clearIcon, root);
     });
 
-    input.addEventListener('input', debounce(() => {
+    input?.addEventListener('input', debounce(() => {
         if (input.value === '') {
             clearSearch(clearIcon, root);
         } else {
