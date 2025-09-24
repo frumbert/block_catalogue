@@ -109,7 +109,11 @@ class block_catalogue_external extends core_course_external {
                 $searchcriteria['search'] = $searchvalue;
                 if ($sort !== "lastaccessed") {
                     $querylimit = (!$haslimit || $limit > $dbquerylimit) ? $dbquerylimit : $limit;
-                    $filter_ids = core_course_category::search_courses($searchcriteria, ['idonly' => true]);
+                    $filter_ids = core_course_category::search_courses($searchcriteria, [
+                        'idonly' => true,
+                        'customfields' => true,
+                        'limittoenrolled' => false
+                    ]);
                 }
                 break;
             case COURSE_CUSTOMFIELD:
@@ -168,7 +172,7 @@ class block_catalogue_external extends core_course_external {
             }
 
             $courses = $DB->get_records_sql("
-                SELECT c.* FROM {course} c
+                SELECT DISTINCT c.* FROM {course} c
                 JOIN {course_categories} cc ON c.category = cc.id
                 JOIN {customfield_data} d ON d.instanceid = c.id
                 JOIN {customfield_field} f ON f.id = d.fieldid

@@ -25,9 +25,8 @@
 
 <div id="block-catalogue-{{uniqid}}" class="block-catalogue block-cards" data-region="catalogue" role="navigation">
   <div role="search" data-region="filter" class="d-flex justify-content-between g-0 mb-1" aria-label="{{#str}} aria:controls, block_catalogue {{/str}}">
-    {{#config.userId}}
     {{> block_catalogue/nav-category-selector }}
-    <div class="d-flex g-0 align-items-start flex-wrap">
+    <div class="d-flex g-0 align-items-start justify-content-end flex-wrap">
 
         {{> block_catalogue/nav-search-widget }}
 
@@ -39,7 +38,6 @@
             {{> block_catalogue/nav-display-selector }}
         {{/displaydropdown}}
     </div>
-    {{/config.userId}}
   </div>
     <div class="container-fluid p-0">
         {{> block_catalogue/courses-view }}
