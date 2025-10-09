@@ -18,14 +18,14 @@
     @template block_catalogue/nav-category-selector
 }}
 <div class="mb-1 category-buttons">
-  {{^config.userId}}
-    <button type="button" class="btn btn-secondary me-1" aria-expanded="false" aria-label="{{#str}} aria:choosecategory, block_catalogue {{/str}}">
+    <button type="button" class="btn btn-{{#config.userId}}outline-{{/config.userId}}secondary me-1 category-all" data-bs-trigger="post" data-filter="category" data-value="" aria-expanded="false" aria-label="{{#str}} aria:choosecategory, block_catalogue {{/str}}">
       {{#str}} all, block_catalogue {{/str}}
     </button>
-  {{/config.userId}}
   {{#categories}}
-    <button type="button" class="btn btn-outline-secondary me-1" data-bs-trigger="post" data-filter="category" data-value="{{id}}" data-pref="{{id}}" aria-expanded="false"
-    aria-label="{{#str}} aria:choosecategory, block_catalogue {{/str}}">
+    <button type="button" class="btn btn-outline-secondary me-1 category-{{categorycss}}"{{#current}} data-current{{/current}} data-bs-trigger="post" data-filter="category" data-value="{{id}}" data-pref="{{id}}" aria-expanded="false"
+    aria-label="{{#str}} aria:choosecategory, block_catalogue {{/str}}"
+    {{^config.userId}}disabled{{/config.userId}}
+    >
       {{name}}
     </button>
   {{/categories}}

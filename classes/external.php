@@ -139,6 +139,7 @@ class block_catalogue_external extends core_course_external {
         //
         // $fields = 'c.' .join(',c.', $requiredproperties); // join(',', array_map(function($v) { return 'c.'.$v; }, $requiredproperties));
 
+        if ($sort === "default") $sort = "c.sortorder";
         if ($sort === "categoryname") $sort = "cc.name";
         if ($sort === "ul.timeaccess desc") { // "lastaccessed") {
             $fields = join(',', $requiredproperties);

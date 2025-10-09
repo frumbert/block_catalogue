@@ -94,6 +94,7 @@ $string['sortbycategoryname'] = 'Sort by category name';
 $string['sortbylastaccessed'] = 'Sort by last accessed';
 $string['sortbyshortname'] = 'Sort by short name';
 $string['sortbypublished'] = 'Sort by date published';
+$string['sortbydefault'] = 'Default sorting';
 $string['privacy:request:preference:set'] = 'The value of the setting \'{$a->name}\' was \'{$a->value}\'';
 $string['viewquickstart'] = 'View Quickstart guide';
 $string['zero_default_title'] = 'You\'re not enrolled in any courses.';

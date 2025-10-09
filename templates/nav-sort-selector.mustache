@@ -35,6 +35,7 @@
                 {{#published}}{{#str}} sortbypublished, block_catalogue {{/str}}{{/published}}
                 {{#shortname}}{{#str}} sortbyshortname, block_catalogue {{/str}}{{/shortname}}
                 {{#category}}{{#str}} sortbycategoryname, block_catalogue {{/str}}{{/category}}
+                {{#default}}{{#str}} sortbydefault, block_catalogue {{/str}}{{/default}}
             </span>
         </button>
         <ul class="dropdown-menu" role="menu" data-show-active-item data-skip-active-class="true" aria-labelledby="sortingdropdown">
@@ -69,7 +70,11 @@
                     {{#str}} sortbypublished, block_catalogue {{/str}}
                 </a>
             </li>
-
+            <li>
+                <a class="dropdown-item" href="#" data-filter="sort" data-pref="title" data-value="default" aria-controls="courses-view-{{uniqid}}" role="menuitem" {{#title}}aria-current="true"{{/title}}>
+                    {{#str}} sortbydefault, block_catalogue {{/str}}
+                </a>
+            </li>
         </ul>
     </div>
 </div>

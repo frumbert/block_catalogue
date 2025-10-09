@@ -49,6 +49,7 @@ define('BLOCK_CATALOGUE_SORTING_TITLE', 'title');
 define('BLOCK_CATALOGUE_SORTING_LASTACCESSED', 'lastaccessed');
 define('BLOCK_CATALOGUE_SORTING_SHORTNAME', 'shortname');
 define('BLOCK_CATALOGUE_SORTING_PUBLISHED', 'published');
+define('BLOCK_CATALOGUE_SORTING_DEFAULT', 'default');
 
 /**
  * Constants for the user preferences view options
@@ -120,7 +121,8 @@ function block_catalogue_user_preferences(): array {
             BLOCK_CATALOGUE_SORTING_TITLE,
             BLOCK_CATALOGUE_SORTING_LASTACCESSED,
             BLOCK_CATALOGUE_SORTING_SHORTNAME,
-            BLOCK_CATALOGUE_SORTING_PUBLISHED
+            BLOCK_CATALOGUE_SORTING_PUBLISHED,
+            BLOCK_CATALOGUE_SORTING_DEFAULT
         ),
         'permissioncallback' => [core_user::class, 'is_current_user'],
     );

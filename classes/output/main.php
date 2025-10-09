@@ -544,7 +544,12 @@ class main implements renderable, templatable {
                     order by sortorder, name
                   ", [$parent]);
         foreach ($records as $record) {
-          $categories[] = ['name'=>$record->name,'id'=>$record->id,'current'=>($record->id==$this->currentcategory)];
+          $categories[] = [
+            'name'=>$record->name,
+            'id'=>$record->id,
+            'current'=>($record->id==$this->currentcategory),
+            'categorycss'=>strtolower(preg_replace('/[^a-zA-Z\-]/','',str_replace(' ','-', $record->name)))
+          ];
         }
         $extras = [
           'categories' => $categories,

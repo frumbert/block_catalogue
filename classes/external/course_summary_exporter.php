@@ -62,7 +62,8 @@ class course_summary_exporter extends \core\external\exporter {
                'isfavourite' => 'bool?',
                'courseadmin' => 'bool?',
                'actionmenu' => 'bool?',
-               'tags' => 'string?'
+               'tags' => 'string?',
+               'categorycss' => 'string?',
         );
     }
 
@@ -88,6 +89,7 @@ class course_summary_exporter extends \core\external\exporter {
             'hidden' => boolval(get_user_preferences('block_myoverview_hidden_course_' . $this->data->id, 0)),
             'showshortname' => $CFG->courselistshortnames ? true : false,
             'coursecategory' => $coursecategory->name,
+            'categorycss' => strtolower(preg_replace('/[^a-zA-Z\-]/','',str_replace(' ','-', $coursecategory->name))),
             // If you don't set related data, it gets stripped out by the exporter
             'isfavourite' => $this->related['isfavourite'],
             'courseadmin' => $this->related['courseadmin'],
@@ -190,7 +192,9 @@ class course_summary_exporter extends \core\external\exporter {
             'coursecategory' => array(
                 'type' => PARAM_TEXT
             ),
-
+            'categorycss' => array(
+                'type' => PARAM_TEXT
+            ),
             'courseadmin' => array(
                 'type' => PARAM_BOOL
             ),
