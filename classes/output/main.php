@@ -490,10 +490,10 @@ class main implements renderable, templatable {
         $extraSql = "";
         $params = [];
         if (!is_siteadmin()) {
-          $extraSql .= "AND f.shortname = 'published' AND d.intvalue > 0";
+          $extraSql .= " AND f.shortname = 'published' AND d.intvalue > 0";
         }
         if (!is_null($this->currentcategory)) {
-          $extraSql .= "AND c.category = ?";
+          $extraSql .= " AND c.category = ?";
           $params[] = $this->currentcategory;
 
         }
