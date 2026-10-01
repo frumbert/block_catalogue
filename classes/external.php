@@ -89,6 +89,7 @@ class block_catalogue_external extends core_course_external {
         $filter_ids = [];
         $requiredfields = $params['requiredfields'];
         $haslimit = !empty($limit);
+        $querylimit = $haslimit ? min($limit, $dbquerylimit) : 0;
 
         switch ($classification) {
             case COURSE_TIMELINE_ALLINCLUDINGHIDDEN:
@@ -107,14 +108,11 @@ class block_catalogue_external extends core_course_external {
                 break;
             case COURSE_TIMELINE_SEARCH:
                 $searchcriteria['search'] = $searchvalue;
-                if ($sort !== "lastaccessed") {
-                    $querylimit = (!$haslimit || $limit > $dbquerylimit) ? $dbquerylimit : $limit;
-                    $filter_ids = core_course_category::search_courses($searchcriteria, [
-                        'idonly' => true,
-                        'customfields' => true,
-                        'limittoenrolled' => false
-                    ]);
-                }
+                $filter_ids = core_course_category::search_courses($searchcriteria, [
+                    'idonly' => true,
+                    'customfields' => true,
+                    'limittoenrolled' => false
+                ]);
                 break;
             case COURSE_CUSTOMFIELD:
                 break;
@@ -124,7 +122,7 @@ class block_catalogue_external extends core_course_external {
 
         $defaultProperties = course_summary_exporter::define_properties();
         $exporterfields = array_keys($defaultProperties);
-        
+
         // Get the required properties from the exporter fields based on the required fields.
         $requiredproperties = array_intersect($exporterfields, $requiredfields);
         // If the resulting required properties is empty, fall back to the exporter fields.
@@ -132,7 +130,7 @@ class block_catalogue_external extends core_course_external {
             $requiredproperties = $exporterfields;
         }
 
-        $filter_category = get_user_preferences('block_catalogue_user_filter_category');
+        $filter_category = (isloggedin() && !isguestuser()) ? get_user_preferences('block_catalogue_user_filter_category') : null;
 
         $showTags = ((get_config('core', 'usetags') == 1) && get_config('block_catalogue', 'showtags') == 1);
 
@@ -143,26 +141,45 @@ class block_catalogue_external extends core_course_external {
         if ($sort === "categoryname") $sort = "cc.name";
         if ($sort === "ul.timeaccess desc") { // "lastaccessed") {
             $fields = join(',', $requiredproperties);
-            if ($classification === COURSE_TIMELINE_SEARCH) {
-                $courses = course_get_enrolled_courses_for_logged_in_user_from_search(
+            $includecourses = $filter_ids;
+            if (!empty($filter_category)) {
+                $categorycourseids = $DB->get_fieldset_sql(
+                    'SELECT id FROM {course} WHERE category = ?',
+                    [$filter_category]
+                );
+                if ($classification === COURSE_TIMELINE_SEARCH) {
+                    $includecourses = array_values(array_intersect($filter_ids, $categorycourseids));
+                } else {
+                    $includecourses = $categorycourseids;
+                }
+            }
+
+            if (($classification === COURSE_TIMELINE_SEARCH && empty($includecourses)) ||
+                    (!empty($filter_category) && empty($includecourses))) {
+                $courses = [];
+            } else {
+                $courses = course_get_enrolled_courses_for_logged_in_user(
                     0,
                     $offset,
                     $sort,
                     $fields,
                     COURSE_DB_QUERY_LIMIT,
-                    $searchcriteria,
-                    $options
+                    $includecourses
                 );
-            } else {
-                $courses = course_get_enrolled_courses_for_logged_in_user(0, $offset, $sort, $fields, COURSE_DB_QUERY_LIMIT);
             }
         } else {
 
             $filterSql = "";
             $params = [];
+            $includecategoryid = (int)get_config('block_catalogue', 'includecategoryid');
             $orderBy = "ORDER BY " . $sort;
             if (!$admin) {
-                $filterSql .= " AND f.shortname = 'listed' AND d.intvalue > 0"; // ?? published is date published .. do we mean 'listed'
+                if ($includecategoryid > 0) {
+                    $filterSql .= " AND ((f.shortname = 'listed' AND d.intvalue > 0) OR c.category = ?)"; // ?? published is date published .. do we mean 'listed'
+                    $params[] = $includecategoryid;
+                } else {
+                    $filterSql .= " AND f.shortname = 'listed' AND d.intvalue > 0"; // ?? published is date published .. do we mean 'listed'
+                }
             }
             if (!empty($filter_ids)) {
                 $filterSql .= " AND c.id IN (" . join(',', $filter_ids) . ")";
@@ -175,12 +192,12 @@ class block_catalogue_external extends core_course_external {
             $courses = $DB->get_records_sql("
                 SELECT DISTINCT c.* FROM {course} c
                 JOIN {course_categories} cc ON c.category = cc.id
-                JOIN {customfield_data} d ON d.instanceid = c.id
-                JOIN {customfield_field} f ON f.id = d.fieldid
+                LEFT JOIN {customfield_data} d ON d.instanceid = c.id
+                LEFT JOIN {customfield_field} f ON f.id = d.fieldid
                 WHERE c.visible = 1
                 $filterSql
                 $orderBy
-                ", $params, $querylimit, $offset);
+                ", $params, $offset, $querylimit);
         }
 
         $PAGE->set_context(\context_system::instance()); // PAGE needs a context otherwise get_renderer can throw a tanty, particularly in developer mode
@@ -188,7 +205,7 @@ class block_catalogue_external extends core_course_external {
 
         // Get the user favourites service, scoped to a single user (their favourites only).
         $favouritecourseids = [];
-        if ($USER->id > 0) {
+        if (isloggedin() && !isguestuser() && $USER->id > 0) {
           // adapted from /blocks/starredcourses/classes/external.php, lime 75
           $usercontext = context_user::instance($USER->id);
           $userservice = \core_favourites\service_factory::get_service_for_user_context($usercontext);
@@ -221,7 +238,7 @@ class block_catalogue_external extends core_course_external {
                   'context' => $context,
                   'isfavourite' => in_array($course->id, $favouritecourseids),
                   'courseadmin' => has_capability('moodle/course:update', $context),
-                  'actionmenu' => isloggedin(),
+                  'actionmenu' => isloggedin() && !isguestuser(),
                   'tags' => '',
                 ];
                 if ($showTags) {

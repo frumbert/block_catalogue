@@ -154,6 +154,9 @@ class main implements renderable, templatable {
      */
     private $customfieldvalue;
 
+    /** @var bool Whether to render public courses into the initial site-index HTML. */
+    private $serversiderender;
+
     /** @var bool true if grouping selector should be shown, otherwise false. */
     protected $displaygroupingselector;
 
@@ -172,13 +175,15 @@ class main implements renderable, templatable {
      *
      * @throws \dml_exception
      */
-    public function __construct($grouping, $sort, $view, $paging, $customfieldvalue = null, $category = null) {
+        public function __construct($grouping, $sort, $view, $paging, $customfieldvalue = null, $category = null,
+            $serversiderender = false) {
         global $CFG;
         // Get plugin config.
         $config = get_config('block_catalogue');
 
         $this->topcategoryid = $config->topcategoryid ?? 0;
         $this->currentcategory = $category;
+        $this->serversiderender = $serversiderender;
 
         $this->showsortbycategories = ($config->showsortbycategories == "1");
 
@@ -202,14 +207,14 @@ class main implements renderable, templatable {
         // Check and remember the given sorting.
         if ($sort) {
             $this->sort = $sort;
-        } else if ($CFG->courselistshortnames) {
+        } else if ($this->serversiderender || $CFG->courselistshortnames) {
             $this->sort = BLOCK_CATALOGUE_SORTING_SHORTNAME;
         } else {
             $this->sort = BLOCK_CATALOGUE_SORTING_TITLE;
         }
         // In case sorting remembered is shortname and display extended course names not checked,
         // we should revert sorting to title.
-        if (!$CFG->courselistshortnames && $sort == BLOCK_CATALOGUE_SORTING_SHORTNAME) {
+        if (!$this->serversiderender && !$CFG->courselistshortnames && $sort == BLOCK_CATALOGUE_SORTING_SHORTNAME) {
             $this->sort = BLOCK_CATALOGUE_SORTING_TITLE;
         }
 
@@ -387,17 +392,23 @@ class main implements renderable, templatable {
         }
         $extraSql = "";
         $params = [];
+        $includecategoryid = (int)get_config('block_catalogue', 'includecategoryid');
         if (!is_siteadmin()) {
-          $extraSql .= " AND f.shortname = 'published' AND d.intvalue > 0";
+            if ($includecategoryid > 0) {
+            $extraSql .= " AND ((f.shortname = 'published' AND d.intvalue > 0) OR c.category = ?)";
+            $params[] = $includecategoryid;
+            } else {
+            $extraSql .= " AND f.shortname = 'published' AND d.intvalue > 0";
+            }
         }
         if (!is_null($this->currentcategory)) {
           $extraSql .= " AND c.category = ?";
           $params[] = $this->currentcategory;
         }
         $courses = $DB->get_records_sql("
-            SELECT c.* FROM {course} c
-            JOIN {customfield_data} d ON d.instanceid = c.id
-            JOIN {customfield_field} f ON f.id = d.fieldid
+            SELECT DISTINCT c.* FROM {course} c
+            LEFT JOIN {customfield_data} d ON d.instanceid = c.id
+            LEFT JOIN {customfield_field} f ON f.id = d.fieldid
             WHERE c.visible = 1
             $extraSql
         ", $params);
@@ -489,8 +500,14 @@ class main implements renderable, templatable {
 
         $extraSql = "";
         $params = [];
+                $includecategoryid = (int)get_config('block_catalogue', 'includecategoryid');
         if (!is_siteadmin()) {
-          $extraSql .= " AND f.shortname = 'published' AND d.intvalue > 0";
+                    if ($includecategoryid > 0) {
+                    $extraSql .= " AND ((f.shortname = 'published' AND d.intvalue > 0) OR c.category = ?)";
+                    $params[] = $includecategoryid;
+                    } else {
+                    $extraSql .= " AND f.shortname = 'published' AND d.intvalue > 0";
+                    }
         }
         if (!is_null($this->currentcategory)) {
           $extraSql .= " AND c.category = ?";
@@ -499,8 +516,8 @@ class main implements renderable, templatable {
         }
         $totalcoursecount = $DB->count_records_sql("
             SELECT count(distinct c.id) FROM {course} c
-            JOIN {customfield_data} d ON d.instanceid = c.id
-            JOIN {customfield_field} f ON f.id = d.fieldid
+            LEFT JOIN {customfield_data} d ON d.instanceid = c.id
+            LEFT JOIN {customfield_field} f ON f.id = d.fieldid
             WHERE c.visible = 1
             $extraSql
         ", $params);
@@ -535,6 +552,25 @@ class main implements renderable, templatable {
             'admin' => is_siteadmin(),
             'isloggedin' => isloggedin()
         ];
+
+        if ($this->serversiderender) {
+            require_once($CFG->dirroot . '/blocks/catalogue/classes/external.php');
+            $courses = \block_catalogue_external::get_filtered_courses(
+                BLOCK_CATALOGUE_GROUPING_ALL,
+                0,
+                0,
+                $sort
+            );
+            foreach ($courses as $course) {
+                $course->showcoursecategory = $this->displaycategories === BLOCK_CATALOGUE_DISPLAY_CATEGORIES_ON;
+            }
+            $viewtemplate = 'block_catalogue/view-' . ($this->view === BLOCK_CATALOGUE_VIEW_CARD ? 'cards' : $this->view);
+            $defaultvariables['serverrenderedcourses'] = $output->render_from_template(
+                $viewtemplate,
+                ['courses' => $courses]
+            );
+            $defaultvariables['serversiderender'] = true;
+        }
 
         // other things we want to expose to the template
         $parent = $this->topcategoryid;

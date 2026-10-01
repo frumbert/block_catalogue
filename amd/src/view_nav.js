@@ -36,10 +36,11 @@ import Config from 'core/config';
  * @return {Promise}
  */
 const updatePreferences = (filter, value) => {
+    if (typeof filter === 'undefined') {
+        return Promise.resolve();
+    }
 
-  if (typeof filter === 'undefined') return;
-
-    // you can only set a type to one of the strings set in lib.php/block_catalogue_user_preferences and only to a value matching the param type defined therein
+    // Only use preference names and values defined in lib.php/block_catalogue_user_preferences.
 
     let type = null;
     if (filter === 'display') {
@@ -55,11 +56,16 @@ const updatePreferences = (filter, value) => {
     }
 
     if (Config.userId == 0) {
-      sessionStorage.setItem(type, value);
-    } else {
-      return setUserPreference(type, value)
-          .catch(Notification.exception);
+        if (filter === 'category' && value === '') {
+            sessionStorage.removeItem(type);
+        } else {
+            sessionStorage.setItem(type, value);
+        }
+        return Promise.resolve();
     }
+
+    const preferenceValue = filter === 'category' && value === '' ? null : value;
+    return setUserPreference(type, preferenceValue).catch(Notification.exception);
 };
 
 /**
@@ -95,9 +101,8 @@ const registerSelector = root => {
                 pends.push(updatePreferences('customfieldvalue', customfieldvalue));
             }
 
-            // this forces the updatePreferences to finish saving before re-initialising the view, so the server-work can pick up any changes
-            Promise.all(pends).then(()=>{
-//console.log('promise all pends');
+            // Wait for preferences to save before reinitialising the view so the server can pick up any changes.
+            Promise.all(pends).then(() => {
                 // Reset the views.
 
                 // Check if the user is currently in a searching state, if so we'll reset it.
@@ -111,7 +116,8 @@ const registerSelector = root => {
                 } else {
                     View.init(root);
                 }
-            });
+                return undefined;
+            }).catch(Notification.exception);
 
             data.originalEvent.preventDefault();
         }
@@ -124,16 +130,15 @@ const registerSelector = root => {
             const option = $(e.target);
 
             if (option.hasClass('active')) {
-                return;
+                return Promise.resolve();
             }
 
             const filter = option.attr('data-display-option');
             const pref = option.attr('data-pref');
 
             root.find(SELECTORS.courseView.region).attr('data-display', option.attr('data-value'));
-            updatePreferences(filter, pref);
-            View.reset(root);
             data.originalEvent.preventDefault();
+            return updatePreferences(filter, pref).then(() => View.reset(root));
         }
     );
 };
@@ -147,5 +152,4 @@ const registerSelector = root => {
 export const init = root => {
     root = $(root);
     registerSelector(root);
-   // console.log('export const init inside view_nav');
 };

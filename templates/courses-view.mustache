@@ -44,6 +44,11 @@
     data-category="{{selectedcategory}}"
     >
     <div data-region="course-view-content">
-        {{> block_catalogue/placeholders }}
+        {{#serversiderender}}
+            {{{serverrenderedcourses}}}
+        {{/serversiderender}}
+        {{^serversiderender}}
+            {{> block_catalogue/placeholders }}
+        {{/serversiderender}}
     </div>
 </div>

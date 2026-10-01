@@ -22,9 +22,6 @@
     Example context (json):
     {}
 
-    i wasn't able to figure out why search doesn't work.
-    so I added the hidden attribute. this lets all the scripts run without failing
-    but hides the search input
 }}
 <div class="mb-1 me-1 flex-grow-1">
     {{< core/search_input_auto }}
@@ -36,7 +33,7 @@
         {{/str}}{{/placeholder}}
 
         {{$additionalattributes}}
-          hidden
+          freetext
         {{/additionalattributes}}
 
     {{/ core/search_input_auto }}

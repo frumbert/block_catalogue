@@ -109,6 +109,10 @@ $string['logcourse'] = 'Course logs';
 $string['category'] = 'Category';
 $string['anycategory'] = 'Any category';
 
+$string['categorydropdownlabel'] = 'Course type';
+
 $string['setting:topcategoryid'] = 'Top category id';
 $string['setting:topcategoryid_desc'] = 'List courses in or under this parent category id';
+$string['setting:includecategoryid'] = 'Include category id without published flag';
+$string['setting:includecategoryid_desc'] = 'Always include courses from this category id even when they do not have the published custom field flag. Set to 0 to disable.';
 $string['setting:sortbycategories'] = 'Show sort by category';

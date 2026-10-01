@@ -24,7 +24,8 @@
 }}
 
 <div id="block-catalogue-{{uniqid}}" class="block-catalogue block-cards" data-region="catalogue" role="navigation">
-  <div role="search" data-region="filter" class="d-flex justify-content-between g-0 mb-1" aria-label="{{#str}} aria:controls, block_catalogue {{/str}}">
+    {{^serversiderender}}
+    <div role="search" data-region="filter" class="d-flex justify-content-between g-0 mb-1" aria-label="{{#str}} aria:controls, block_catalogue {{/str}}">
     {{> block_catalogue/nav-category-selector }}
     <div class="d-flex g-0 align-items-start justify-content-end flex-wrap">
 
@@ -39,10 +40,12 @@
         {{/displaydropdown}}
     </div>
   </div>
+    {{/serversiderender}}
     <div class="container-fluid p-0">
         {{> block_catalogue/courses-view }}
     </div>
 </div>
+{{^serversiderender}}
 {{#js}}
 require(
 [
@@ -57,3 +60,4 @@ function(
     Main.init(root);
 });
 {{/js}}
+{{/serversiderender}}

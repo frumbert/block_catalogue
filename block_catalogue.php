@@ -56,8 +56,18 @@ class block_catalogue extends block_base {
         $paging = get_user_preferences('block_catalogue_user_paging_preference');
         $customfieldvalue = get_user_preferences('block_catalogue_user_grouping_customfieldvalue_preference');
         $category = get_user_preferences('block_catalogue_user_filter_category');
+        $category = $category === '' ? null : $category;
 
-        $renderable = new \block_catalogue\output\main($group, $sort, $view, $paging, $customfieldvalue, $category);
+        $serversiderender = $this->page->pagetype === 'site-index' && (!isloggedin() || isguestuser());
+        $renderable = new \block_catalogue\output\main(
+            $group,
+            $sort,
+            $view,
+            $paging,
+            $customfieldvalue,
+            $category,
+            $serversiderender
+        );
         $renderer = $this->page->get_renderer('block_catalogue');
 
         $this->content = new stdClass();

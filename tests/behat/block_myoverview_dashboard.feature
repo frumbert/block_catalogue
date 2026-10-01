@@ -66,6 +66,16 @@ Feature: The my overview block allows users to easily access their courses
     Then I should see "Course 4" in the "Course overview" "block"
     Then I should see "Course 5" in the "Course overview" "block"
 
+  Scenario: Filter courses by category
+    Given I am on the "My courses" page logged in as "student1"
+    And I click on "categorydropdown" "button" in the "Course overview" "block"
+    When I click on "Category 1" "button" in the "Course overview" "block"
+    Then I should see "Course 4" in the "Course overview" "block"
+    And I should not see "Course 2" in the "Course overview" "block"
+    When I click on "categorydropdown" "button" in the "Course overview" "block"
+    And I click on "[data-filter='category'][data-value='']" "css_element" in the "Course overview" "block"
+    Then I should see "Course 2" in the "Course overview" "block"
+
   Scenario: View all (including removed from view) courses
     Given the following config values are set as admin:
       | config                            | value | plugin           |
@@ -181,6 +191,15 @@ Feature: The my overview block allows users to easily access their courses
     And I reload the page
     Then I should see "Sort by last accessed" in the "Course overview" "block"
     And "[data-sort='ul.timeaccess desc']" "css_element" in the "Course overview" "block" should be visible
+
+  Scenario: Last accessed sorting respects the selected category
+    Given I am on the "My courses" page logged in as "student1"
+    And I click on "sortingdropdown" "button" in the "Course overview" "block"
+    And I click on "Sort by last accessed" "link" in the "Course overview" "block"
+    And I click on "categorydropdown" "button" in the "Course overview" "block"
+    When I click on "Category 1" "button" in the "Course overview" "block"
+    Then I should see "Course 4" in the "Course overview" "block"
+    And I should not see "Course 2" in the "Course overview" "block"
 
   Scenario: Short name sort persistence
     Given I am on the "My courses" page logged in as "student1"

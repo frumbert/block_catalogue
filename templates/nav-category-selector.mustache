@@ -17,16 +17,35 @@
 {{!
     @template block_catalogue/nav-category-selector
 }}
-<div class="mb-1 category-buttons">
-    <button type="button" class="btn btn-{{#config.userId}}outline-{{/config.userId}}secondary me-1 category-all" data-bs-trigger="post" data-filter="category" data-value="" aria-expanded="false" aria-label="{{#str}} aria:choosecategory, block_catalogue {{/str}}">
-      {{#str}} all, block_catalogue {{/str}}
-    </button>
-  {{#categories}}
-    <button type="button" class="btn btn-outline-secondary me-1 category-{{categorycss}}"{{#current}} data-current{{/current}} data-bs-trigger="post" data-filter="category" data-value="{{id}}" data-pref="{{id}}" aria-expanded="false"
-    aria-label="{{#str}} aria:choosecategory, block_catalogue {{/str}}"
-    {{^config.userId}}disabled{{/config.userId}}
-    >
-      {{name}}
-    </button>
-  {{/categories}}
+<div class="dropdown mb-1 me-1 category-buttons">
+  <span class="me-2">{{#str}} categorydropdownlabel, block_catalogue {{/str}}</span>
+  <button id="categorydropdown" type="button"
+    class="btn btn-outline-secondary dropdown-toggle {{^selectedcategory}}category-all{{/selectedcategory}}{{#categories}}{{#current}}category-{{categorycss}}{{/current}}{{/categories}}"
+    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+    aria-label="{{#str}} categorydropdownlabel, block_catalogue {{/str}}"
+    {{^config.userId}}disabled{{/config.userId}}>
+    <span data-active-item-text>
+      {{^selectedcategory}}{{#str}} all, block_catalogue {{/str}}{{/selectedcategory}}
+      {{#categories}}{{#current}}{{name}}{{/current}}{{/categories}}
+    </span>
+  </button>
+  <ul class="dropdown-menu" role="menu" data-show-active-item data-skip-active-class="true"
+    aria-labelledby="categorydropdown">
+    <li>
+      <button type="button" class="dropdown-item category-all" data-filter="category" data-value="" data-pref=""
+        aria-controls="courses-view-{{uniqid}}" role="menuitem"
+        {{^selectedcategory}}aria-current="true"{{/selectedcategory}} {{^config.userId}}disabled{{/config.userId}}>
+        {{#str}} all, block_catalogue {{/str}}
+      </button>
+    </li>
+    {{#categories}}
+    <li>
+      <button type="button" class="dropdown-item category-{{categorycss}}" data-filter="category"
+        data-value="{{id}}" data-pref="{{id}}" aria-controls="courses-view-{{uniqid}}" role="menuitem"
+        {{#current}}aria-current="true"{{/current}} {{^config.userId}}disabled{{/config.userId}}>
+        {{name}}
+      </button>
+    </li>
+    {{/categories}}
+  </ul>
 </div>

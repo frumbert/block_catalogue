@@ -125,7 +125,7 @@ const getMyCourses = (filters, limit) => {
         summaryDisplayLoaded = true; // TIM
     }
     // return Repository.getEnrolledCoursesByTimeline(params); // TIM
-    
+
     return Repository.getCatalogueCourses(params); // TIM
 };
 
@@ -152,8 +152,8 @@ const getSearchMyCourses = (filters, limit, searchValue) => {
         summaryDisplayLoaded = true;
     } else {
         params.requiredfields = Repository.CARDLIST_REQUIRED_FIELDS;
-        // summaryDisplayLoaded = false; 
-        summaryDisplayLoaded = true; // TIM 
+        // summaryDisplayLoaded = false;
+        summaryDisplayLoaded = true; // TIM
     }
     // return Repository.getEnrolledCoursesByTimeline(params); // TIM
     return Repository.getCatalogueCourses(params); // TIM
@@ -257,7 +257,9 @@ const getRemoveFavouriteMenuItem = (root, courseId) => {
  */
 const addToFavourites = (root, courseId) => {
 
-    if (Config.userId == 0) return;
+    if (Config.userId == 0) {
+        return;
+    }
 
     const removeAction = getRemoveFavouriteMenuItem(root, courseId);
     const addAction = getAddFavouriteMenuItem(root, courseId);
@@ -283,7 +285,9 @@ const addToFavourites = (root, courseId) => {
  */
 const removeFromFavourites = (root, courseId) => {
 
-    if (Config.userId == 0) return;
+    if (Config.userId == 0) {
+        return;
+    }
 
     const removeAction = getRemoveFavouriteMenuItem(root, courseId);
     const addAction = getAddFavouriteMenuItem(root, courseId);
@@ -331,7 +335,9 @@ const getShowCourseMenuItem = (root, courseId) => {
  */
 const hideCourse = (root, courseId) => {
 
-    if (Config.userId == 0) return;
+    if (Config.userId == 0) {
+        return;
+    }
 
     const hideAction = getHideCourseMenuItem(root, courseId);
     const showAction = getShowCourseMenuItem(root, courseId);
@@ -358,7 +364,9 @@ const hideCourse = (root, courseId) => {
  */
 const showCourse = (root, courseId) => {
 
-    if (Config.userId == 0) return;
+    if (Config.userId == 0) {
+        return;
+    }
 
     const hideAction = getHideCourseMenuItem(root, courseId);
     const showAction = getShowCourseMenuItem(root, courseId);
@@ -387,7 +395,9 @@ const showCourse = (root, courseId) => {
  */
 const setCourseHiddenState = (courseId, status) => {
 
-    if (Config.userId == 0) return;
+    if (Config.userId == 0) {
+        return;
+    }
 
     // If the given status is not hidden, the preference has to be deleted with a null value.
     if (status === false) {
@@ -470,7 +480,9 @@ const hideElement = (root, id) => {
  */
 const setCourseFavouriteState = (courseId, status) => {
 
-    if (Config.userId == 0) return;
+    if (Config.userId == 0) {
+        return;
+    }
 
     return Repository.setFavouriteCourses({
         courses: [

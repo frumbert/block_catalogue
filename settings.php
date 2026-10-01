@@ -46,6 +46,13 @@ if ($ADMIN->fulltree) {
       '0',
       PARAM_INT));
 
+                $settings->add(new admin_setting_configtext(
+                        'block_catalogue/includecategoryid',
+                        get_string('setting:includecategoryid', 'block_catalogue'),
+                        get_string('setting:includecategoryid_desc', 'block_catalogue'),
+                        '0',
+                        PARAM_INT));
+
     $settings->add(new admin_setting_configcheckbox(
             'block_catalogue/showsortbycategories',
             get_string('setting:sortbycategories', 'block_catalogue'),
