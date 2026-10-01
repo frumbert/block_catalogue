@@ -189,15 +189,23 @@ class block_catalogue_external extends core_course_external {
                 $params[] = $filter_category;
             }
 
-            $courses = $DB->get_records_sql("
-                SELECT DISTINCT c.* FROM {course} c
-                JOIN {course_categories} cc ON c.category = cc.id
-                LEFT JOIN {customfield_data} d ON d.instanceid = c.id
-                LEFT JOIN {customfield_field} f ON f.id = d.fieldid
-                WHERE c.visible = 1
-                $filterSql
-                $orderBy
-                ", $params, $offset, $querylimit);
+            if ($classification === COURSE_TIMELINE_SEARCH && empty($filter_ids)) {
+                $courses = [];
+            } else {
+                if (!empty($filter_ids)) {
+                    $filterSql .= " AND c.id IN (" . join(',', $filter_ids) . ")";
+                }
+
+                $courses = $DB->get_records_sql("
+                    SELECT DISTINCT c.* FROM {course} c
+                    JOIN {course_categories} cc ON c.category = cc.id
+                    LEFT JOIN {customfield_data} d ON d.instanceid = c.id
+                    LEFT JOIN {customfield_field} f ON f.id = d.fieldid
+                    WHERE c.visible = 1
+                    $filterSql
+                    $orderBy
+                    ", $params, $offset, $querylimit);
+            }
         }
 
         $PAGE->set_context(\context_system::instance()); // PAGE needs a context otherwise get_renderer can throw a tanty, particularly in developer mode

@@ -51,6 +51,13 @@ Feature: My overview block searching
     And I should not see "Course 13" in the "Course overview" "block"
     And I log out
 
+  Scenario: Search with no matches
+    Given I am on the "My courses" page logged in as "student1"
+    And I set the field "Search courses" in the "Course overview" "block" to "no matching course"
+    Then I should see "No courses" in the "Course overview" "block"
+    And I should not see "Course 01" in the "Course overview" "block"
+    And I log out
+
   Scenario: Paginated search
     Given I am on the "My courses" page logged in as "student1"
     And I set the field "Search courses" in the "Course overview" "block" to "Course"
